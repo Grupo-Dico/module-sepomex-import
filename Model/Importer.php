@@ -41,9 +41,9 @@ class Importer
             )
         );
 
-        if (!in_array($ext, array('xls', 'xlsx'), true)) {
+        if (!in_array($ext, array('xls', 'xlsx', 'csv'), true)) {
             throw new \RuntimeException(
-                'Formato no permitido. Use XLS o XLSX.'
+                'Formato no permitido. Use XLS, XLSX o CSV.'
             );
         }
 
@@ -87,24 +87,37 @@ class Importer
         }
 
         $csv = null;
+        $deleteCsvAfterImport = false;
 
         try {
             /*
-             * 1. Convertir Excel -> CSV.
-             */
-            $converted = $this->converter->convert(
-                $file['tmp_name']
-            );
-
-            if (!isset($converted['path'])
-                || !is_file($converted['path'])
-            ) {
-                throw new \RuntimeException(
-                    'No se generó correctamente el CSV temporal.'
+            * 1. Preparar CSV de importación.
+            *
+            * XLS/XLSX:
+            *   se convierten al formato CSV canónico.
+            *
+            * CSV:
+            *   se utiliza directamente, sin pasar por
+            *   PhpSpreadsheet.
+            */
+            if ($ext === 'csv') {
+                $csv = $file['tmp_name'];
+            } else {
+                $converted = $this->converter->convert(
+                    $file['tmp_name']
                 );
-            }
 
-            $csv = $converted['path'];
+                if (!isset($converted['path'])
+                    || !is_file($converted['path'])
+                ) {
+                    throw new \RuntimeException(
+                        'No se generó correctamente el CSV temporal.'
+                    );
+                }
+
+                $csv = $converted['path'];
+                $deleteCsvAfterImport = true;
+            }
 
             /*
              * 2. Validar estructura de la tabla activa.
@@ -373,7 +386,10 @@ class Importer
             /*
              * El CSV sólo es temporal.
              */
-            if ($csv !== null && is_file($csv)) {
+            if ($deleteCsvAfterImport
+                && $csv !== null
+                && is_file($csv)
+            ) {
                 @unlink($csv);
             }
 
@@ -421,13 +437,43 @@ class Importer
          */
         $header = fgetcsv($handle, 0, '|');
 
-        if (!is_array($header)
-            || count($header) < 10
-        ) {
+        if (!is_array($header)) {
             fclose($handle);
 
             throw new \RuntimeException(
-                'El CSV generado no contiene un encabezado válido.'
+                'El CSV no contiene un encabezado válido.'
+            );
+        }
+
+        /*
+        * El CSV debe utilizar exactamente el formato canónico
+        * empleado internamente por el importador.
+        */
+        $normalizedHeader = array();
+
+        foreach ($header as $value) {
+            $normalizedHeader[] = trim(
+                (string) $value
+            );
+        }
+
+        /*
+        * El primer campo puede contener BOM UTF-8.
+        */
+        if (isset($normalizedHeader[0])) {
+            $normalizedHeader[0] = preg_replace(
+                '/^\xEF\xBB\xBF/',
+                '',
+                $normalizedHeader[0]
+            );
+        }
+
+        if ($normalizedHeader !== $this->baseColumns) {
+            fclose($handle);
+
+            throw new \RuntimeException(
+                'Encabezado CSV inválido. Se esperaba: '
+                . implode('|', $this->baseColumns)
             );
         }
 
@@ -438,10 +484,14 @@ class Importer
             while (
                 ($row = fgetcsv($handle, 0, '|')) !== false
             ) {
-                if (count($row) < 10) {
+                if (count($row) !== count($this->baseColumns)) {
                     throw new \RuntimeException(
                         'CSV inválido cerca del registro '
                         . ($count + 2)
+                        . ': se esperaban '
+                        . count($this->baseColumns)
+                        . ' columnas y se encontraron '
+                        . count($row)
                         . '.'
                     );
                 }

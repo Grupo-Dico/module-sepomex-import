@@ -1,8 +1,90 @@
 <?php /** @var \Magento\Backend\Block\Template $block */ ?>
-<div class="admin__fieldset-wrapper"><div class="admin__fieldset-wrapper-title"><strong class="title"><span><?= $block->escapeHtml(__('Importar catálogo SEPOMEX')) ?></span></strong></div><div class="admin__fieldset-wrapper-content">
-<form method="post" action="<?= $block->escapeUrl($block->getUrl('sepomex/import/execute')) ?>" enctype="multipart/form-data">
-<?= $block->getBlockHtml('formkey') ?>
-<fieldset class="admin__fieldset"><div class="admin__field required"><label class="admin__field-label" for="sepomex_file"><span><?= $block->escapeHtml(__('Archivo SEPOMEX')) ?></span></label><div class="admin__field-control"><input type="file" name="sepomex_file" id="sepomex_file" accept=".xls,.xlsx" required><div class="note"><?= $block->escapeHtml(__('El Excel se convierte primero a CSV delimitado por |. Después se valida y sólo entonces se reemplaza SEPOMEX.')) ?></div></div></div>
-<div class="admin__field"><div class="admin__field-control"><button class="action-primary" type="submit"><span><?= $block->escapeHtml(__('Importar SEPOMEX')) ?></span></button></div></div></fieldset></form>
-<p><strong><?= $block->escapeHtml(__('Respaldo:')) ?></strong> <?= $block->escapeHtml(__('se conserva una sola tabla sepomex_backup; se reemplaza únicamente después de validar la nueva importación.')) ?></p>
-</div></div>
+
+<div class="admin__fieldset-wrapper">
+    <div class="admin__fieldset-wrapper-title">
+        <strong class="title">
+            <span>
+                <?= $block->escapeHtml(__('Importar catálogo SEPOMEX')) ?>
+            </span>
+        </strong>
+    </div>
+
+    <div class="admin__fieldset-wrapper-content">
+        <form
+            method="post"
+            action="<?= $block->escapeUrl(
+                $block->getUrl('sepomex/import/execute')
+            ) ?>"
+            enctype="multipart/form-data"
+        >
+            <?= $block->getBlockHtml('formkey') ?>
+
+            <fieldset class="admin__fieldset">
+                <div class="admin__field required">
+                    <label
+                        class="admin__field-label"
+                        for="sepomex_file"
+                    >
+                        <span>
+                            <?= $block->escapeHtml(
+                                __('Archivo SEPOMEX')
+                            ) ?>
+                        </span>
+                    </label>
+
+                    <div class="admin__field-control">
+                        <input
+                            type="file"
+                            name="sepomex_file"
+                            id="sepomex_file"
+                            accept=".xls,.xlsx,.csv"
+                            required
+                        >
+
+                        <div class="note">
+                            <?= $block->escapeHtml(
+                                __(
+                                    'Formatos permitidos: XLS, XLSX y CSV. '
+                                    . 'Los archivos Excel se convierten automáticamente '
+                                    . 'a CSV delimitado por |. '
+                                    . 'Los archivos CSV compatibles se procesan directamente. '
+                                    . 'Después se valida la información y sólo entonces '
+                                    . 'se reemplaza SEPOMEX.'
+                                )
+                            ) ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin__field">
+                    <div class="admin__field-control">
+                        <button
+                            class="action-primary"
+                            type="submit"
+                        >
+                            <span>
+                                <?= $block->escapeHtml(
+                                    __('Importar SEPOMEX')
+                                ) ?>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+
+        <p>
+            <strong>
+                <?= $block->escapeHtml(__('Respaldo:')) ?>
+            </strong>
+
+            <?= $block->escapeHtml(
+                __(
+                    'se conserva una sola tabla sepomex_backup; '
+                    . 'se reemplaza únicamente después de validar '
+                    . 'la nueva importación.'
+                )
+            ) ?>
+        </p>
+    </div>
+</div>
