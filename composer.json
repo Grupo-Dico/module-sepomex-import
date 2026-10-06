@@ -1,0 +1,21 @@
+{
+    "name": "gdmexico/module-sepomex-import",
+    "description": "Importador SEPOMEX XLS/XLSX compatible con Magento 2.4.2+ y PHP 7.4+",
+    "type": "magento2-module",
+    "version": "1.1.0",
+    "license": [
+        "proprietary"
+    ],
+    "require": {
+        "php": ">=7.4 <8.5",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "GDMexico\\SepomexImport\\": ""
+        }
+    }
+}

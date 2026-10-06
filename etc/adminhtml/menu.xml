@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd"><menu>
+ <add id="GDMexico_SepomexImport::sepomex" title="SEPOMEX" module="GDMexico_SepomexImport" sortOrder="90" parent="Magento_Backend::system" resource="GDMexico_SepomexImport::sepomex"/>
+ <add id="GDMexico_SepomexImport::import" title="Importar SEPOMEX" module="GDMexico_SepomexImport" sortOrder="10" parent="GDMexico_SepomexImport::sepomex" action="sepomex/import/index" resource="GDMexico_SepomexImport::import"/>
+</menu></config>
